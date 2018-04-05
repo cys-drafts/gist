@@ -1,0 +1,4 @@
+1. highlight current line
+修改当前使用的colorscheme:
+current_line=0x000000;0x00ff00;true
+可以从/usr/share/geany/colorschemes/拷贝到~/.config/geany/colorschemes/进行修改；
