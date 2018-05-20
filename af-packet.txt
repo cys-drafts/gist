@@ -1,0 +1,1 @@
+如果使用了packet-mmap，需要先unmap，否则直接close(fd)无法释放套接字
