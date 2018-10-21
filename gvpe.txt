@@ -1,0 +1,58 @@
+1 安装配置
+参考官方文档
+$cat /etc/gvpe/gvpe.conf
+enable-tcp = yes
+ip-proto = 6
+tcp-port = 443
+mtu = 1400
+ifname = vpn0
+
+node = local
+connect = ondemand
+
+node = proxy
+hostname = X.X.X.X
+
+~$ cat /etc/gvpe/if-up 
+#!/bin/sh
+
+ip link set $IFNAME address $MAC mtu $MTU up
+
+[ $NODENAME = local  ] && ip addr add 10.0.1.1 dev $IFNAME
+[ $NODENAME = proxy ] && ip addr add 10.0.2.1 dev $IFNAME
+
+ip route add 10.0.0.0/16 dev $IFNAME
+
+2 部署
+2.1 pc <--> vps
+如果要翻墙，在vps部署socks代理dante
+$ cat dante.conf
+logoutput: /home/myvpsmy/sockd.log
+
+clientmethod: none
+socksmethod: none
+
+internal: 10.0.2.1 port = 1080
+external: eth0
+
+client pass {
+	from: 10.0.0.0/16 to: 0.0.0.0/0
+}
+
+socks pass {
+	from: 0.0.0.0/0 to: 0.0.0.0/0
+	command: bind connect udpassociate
+}
+
+2.2 pc <--> router <--> vps
+router和vps部署gvpe，vps部署socks代理dante
+小米路由器上需要修改防火墙规则：
+iptables -I zone_lan_forward 6 -j ACCEPT
+vps上需要加路由：
+ip r a 192.168.31.0/24 via 10.0.1.1 dev vpn0
+dante需要放通该内网网段
+client pass {
+	from: 192.168.31.0/24 to: 0.0.0.0/0
+}
+
+以上两种部署模式，浏览器socks代理需要指向 10.0.2.1:1080
