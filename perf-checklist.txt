@@ -1,0 +1,43 @@
+== perf analysis in 60s ==
+1 uptime
+2 dmesg -T | tail
+3 vmstat 1
+4 mpstat -P ALL 1
+5 pidstat 1
+6 iostat -xz 1
+7 free -m
+8 sar -n DEV 1
+9 sar -n TCP,ETCP 1
+10 top
+
+== disk checklist ==
+1 iostat -xnz 1	-> any disk io? if not, stop looking
+2 vmstat 1	-> swapping? or high sys time?
+3 df -h		-> file systems nearly full?
+4 ext4slower 10	-> slow file system io?
+5 bioslower 10	-> if so, check disks
+6 ext4dist 1	-> check distribution and rate
+7 biolatency 1	-> if interesting, check disks
+8 cat /sys/devices/../ioerr_cnt	-> errors
+9 smartctl -l error /dev/sda1	-> errors
+
+== network checklist ==
+1 sar -n DEV,EDEV 1	-> at interface limits? or use nicstat
+2 sar -n TCP,ETCP 1	-> active/passive load, retransmit rate
+3 cat /etc/resolv.conf	-> it's always DNS
+4 mpstat -P ALL 1	-> high kernel time? single hot CPU?
+5 tcpretrans		-> what are the retransmits?
+6 tcpconnect		-> connecting to anything unexpected?
+7 tcpaccept		-> unexpected workload?
+8 netstat -rnv		-> any inefficient routes?
+9 check firewall config	-> anything blocking/throttling?
+10 netstat -s		-> play 252 metric pickup
+
+== CPU checklist ==
+1 uptime		-> load averages
+2 vmstat 1		-> system-wide utilization, runq length
+3 mpstat -P ALL 1	-> CPU balance
+4 pidstat 1		-> per-process CPU
+5 CPU flame graph	-> CPU profiling
+6 CPU subsecond offset heat map	->look for gaps
+7 perf stat -a -- sleep 10	-> IPC,LLC hit ratio

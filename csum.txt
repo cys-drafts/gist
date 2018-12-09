@@ -1,0 +1,63 @@
+
+
+How to compute 16-bit one's complement sum
+
+ 
+
+What that means is:
+
+1. Add the 16-bit values up. Each time a carry-out (17th bit) is
+produced, swing that bit around and add it back into the LSb (one's
+digit). This is somewhat erroneously referred to as "one's complement
+addition."
+
+2. Once all the values are added in this manner, invert all the bits
+in the result. A binary value that has all the bits of another binary
+value inverted is called its "one's complement," or simply its
+"complement."
+
+For example, suppose our header has the following data. I separate the
+data into groups of 4 bits only for readability. (I know that headers
+are really longer than 8 bytes, but this will demonstrate the
+process):
+
+     1000 0110 0101 1110
+     1010 1100 0110 0000
+     0111 0001 0010 1010
+     1000 0001 1011 0101
+
+First, we add the 16-bit values 2 at a time:
+
+         1000 0110 0101 1110   First 16-bit value
+     +   1010 1100 0110 0000   Second 16-bit value
+       ---------------------
+       1 0011 0010 1011 1110   Produced a carry-out, which gets added
+     +  /----------------> 1   back into LBb
+       ---------------------
+         0011 0010 1011 1111
+     +   0111 0001 0010 1010   Third 16-bit value
+       ---------------------
+       0 1010 0011 1110 1001   No carry to swing around (**)
+     +   1000 0001 1011 0101   Fourth 16-bit value
+       ---------------------
+       1 0010 0101 1001 1110   Produced a carry-out, which gets added
+     +  /----------------> 1   back into LBb
+       ---------------------
+         0010 0101 1001 1111   Our "one's complement sum"
+
+(**) Note that we could "swing around" the carry-out of 0, but adding
+0 back into the LSb has no affect on the sum. (But technically, that's
+what the checksum generator does.)
+
+Of course, we'd continue to add the rest of the header data in 16-bit
+segments until all data were included.
+
+Then we have to take the one's complement of the sum. We do this by
+simply inverting all the bits in the final result from above:
+
+         0010 0101 1001 1111   Our "one's complement sum"
+
+         1101 1010 0110 0000   The "one's complement"
+
+So the checksum stored in the header would be 1101 1010 0110 0000.
+
