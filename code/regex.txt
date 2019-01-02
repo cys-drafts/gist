@@ -1,0 +1,2 @@
+# select $ip $status from nginx access.log
+sed 's/^\(\S\+\) \S\+ \S\+ \[.\+\] "[^"]\+" \(\S\+\) .\+/\1 \2/' $file
